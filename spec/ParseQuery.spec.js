@@ -23,6 +23,68 @@ describe('Parse.Query testing', () => {
     });
   });
 
+  it("notEqualTo with Relation is working", function(done) {
+    var user = new Parse.User();
+    user.setPassword("asdf");
+    user.setUsername("zxcv");
+
+    var user1 = new Parse.User();
+    user1.setPassword("asdf");
+    user1.setUsername("qwerty");
+
+    var user2 = new Parse.User();
+    user2.setPassword("asdf");
+    user2.setUsername("asdf");
+
+    var Cake = Parse.Object.extend("Cake");
+    var cake1 = new Cake();
+    var cake2 = new Cake();
+    var cake3 = new Cake();
+
+
+    user.signUp().then(function(){
+      return user1.signUp();
+    }).then(function(){
+      return user2.signUp();
+    }).then(function(){
+      var relLike1 = cake1.relation("amateur");
+      relLike1.add(user);
+      relLike1.add(user1);
+
+      var relDislike1 = cake1.relation("hater");
+      relLike1.add(user2);
+
+      return cake1.save();
+    }).then(function(){
+      var rellike2 = cake2.relation("amateur");
+      rellike2.add(user);
+      rellike2.add(user1);
+
+      var relDislike2 = cake2.relation("hater");
+      rellike2.add(user2);
+
+      return cake2.save();
+    }).then(function(){
+      var rellike3 = cake3.relation("amateur");
+      rellike3.add(user);
+
+      var relDislike3 = cake3.relation("hater");
+      rellike3.add(user1);
+      rellike3.add(user2);
+
+      return cake3.save();
+    }).then(function(){
+      var query = new Parse.Query(Cake);
+      query.notEqualTo("hater", user2);
+      return query.find().then(function(results){
+        equal(results.length, 0);
+      });
+    }).then(function(){
+      done();
+    })
+
+  });
+
   it("query with limit", function(done) {
     var baz = new TestObject({ foo: 'baz' });
     var qux = new TestObject({ foo: 'qux' });
