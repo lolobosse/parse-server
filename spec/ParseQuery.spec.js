@@ -75,8 +75,35 @@ describe('Parse.Query testing', () => {
       return cake3.save();
     }).then(function(){
       var query = new Parse.Query(Cake);
+      // User2 likes nothing so we should receive 0
+      query.equalTo("liker", user2);
+      return query.find().then(function(results){
+        equal(results.length, 0);
+      });
+    }).then(function(){
+      var query = new Parse.Query(Cake);
+      // User1 likes two of three cakes
+      query.equalTo("liker", user1);
+      return query.find().then(function(results){
+        // This test fails on 2.2.4
+        // It should return 2 -> cake 1 and cake 2
+        equal(results.length, 2);
+      });
+    }).then(function(){
+      var query = new Parse.Query(Cake);
+      // We want to know which cake the user1 is not appreciating -> cake3
+      query.notEqualTo("liker", user1);
+      return query.find().then(function(results){
+        // This test fails on 2.2.4
+        // Should return 1 -> the cake 3
+        equal(results.length, 1);
+      });
+    }).then(function(){
+      var query = new Parse.Query(Cake);
+      // User2 is a hater of everything so we should receive 0
       query.notEqualTo("hater", user2);
       return query.find().then(function(results){
+        // This test fails on 2.2.4
         equal(results.length, 0);
       });
     }).then(function(){
