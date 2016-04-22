@@ -66,7 +66,7 @@ describe('Parse.Query testing', () => {
       rellike3.add(user);
 
       var relDislike3 = cake3.relation("hater");
-      relDislike3.add([user1, user2]);
+      relDislike3.add(user2);
       return cake3.save();
     }).then(function(){
       var query = new Parse.Query(Cake);
@@ -102,6 +102,14 @@ describe('Parse.Query testing', () => {
       var query = new Parse.Query(Cake);
       // Only cake3 is liked by user
       query.notContainedIn("liker", [user1]);
+      return query.find().then(function(results){
+        equal(results.length, 1);
+      });
+    }).then(function(){
+      var query = new Parse.Query(Cake);
+      // Should return the one cake: the cake 3 which hasn't be either like or dislike by the user1
+      query.notEqualTo("liker", user1);
+      query.notEqualTo("hater", user1);
       return query.find().then(function(results){
         equal(results.length, 1);
       });
